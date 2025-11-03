@@ -7,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 
 // Configuration of the connection to the database
 builder.Services.AddDbContext<PersonaDbContext>(options =>
@@ -27,6 +30,9 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
+// Swagger UI
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseStaticFiles();
 
