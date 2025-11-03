@@ -1,0 +1,28 @@
+# Ignorar archivos de Git
+.git
+.gitignore
+
+# Archivos temporales y de sistema
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Archivos de configuración de usuario
+*.user
+*.suo
+
+# Directorios de compilación
+bin/
+obj/
+.vs/
+publish/
+out/
+
+# Volúmenes de SQL y datos persistentes
+mssql_data/
+
+# Archivos innecesarios
+README.md
+docker-compose.yml
