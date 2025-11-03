@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace personapi-dotnet.Models.Entities;
+namespace personapi_dotnet.Models.Entities;
 
 public partial class Telefono
 {

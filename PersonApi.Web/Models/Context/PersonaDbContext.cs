@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using personapi;
+using personapi_dotnet.Models.Entities;
 
 namespace personapi_dotnet.Models.Context;
 
