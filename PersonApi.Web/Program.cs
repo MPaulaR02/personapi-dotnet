@@ -1,16 +1,24 @@
 using Microsoft.EntityFrameworkCore;
 using personapi_dotnet.Models.Context;
+using personapi_dotnet.Models.Interfaces;
+using personapi_dotnet.Models.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configuración de la conexión a la base de datos
+// Configuration of the connection to the database
 builder.Services.AddDbContext<PersonaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
            .EnableSensitiveDataLogging()
            .LogTo(Console.WriteLine, LogLevel.Information));
+
+// Repositories (DI)
+builder.Services.AddScoped<IPersonaRepository, PersonaRepository>();
+builder.Services.AddScoped<IProfesionRepository, ProfesionRepository>();
+builder.Services.AddScoped<ITelefonoRepository, TelefonoRepository>();
+builder.Services.AddScoped<IEstudioRepository, EstudioRepository>();
 
 var app = builder.Build();
 

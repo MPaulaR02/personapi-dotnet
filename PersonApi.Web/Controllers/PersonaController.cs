@@ -1,24 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using personapi_dotnet.Models.Context;
 using personapi_dotnet.Models.ViewModels;
 using personapi_dotnet.Models.Entities;
+using personapi_dotnet.Models.Interfaces;
 
 namespace PersonApi.Web.Controllers
 {
     public class PersonaController : Controller
     {
-        private readonly PersonaDbContext _context;
+        private readonly IPersonaRepository _personas;
 
-        public PersonaController(PersonaDbContext context)
+        public PersonaController(IPersonaRepository personas)
         {
-            _context = context;
+            _personas = personas;
         }
 
         // GET: Persona
         public async Task<IActionResult> Index()
         {
-            var personas = await _context.Personas
+            var personas = (await _personas.GetAllAsync())
                 .Select(p => new PersonaViewModel
                 {
                     Cc = p.Cc,
@@ -27,7 +27,7 @@ namespace PersonApi.Web.Controllers
                     Genero = p.Genero,
                     Edad = p.Edad
                 })
-                .ToListAsync();
+                .ToList();
 
             return View(personas);
         }
@@ -40,10 +40,7 @@ namespace PersonApi.Web.Controllers
                 return NotFound();
             }
 
-            var persona = await _context.Personas
-                .Include(p => p.Telefonos)
-                .Include(p => p.Estudios)
-                .FirstOrDefaultAsync(m => m.Cc == id);
+            var persona = await _personas.GetByIdWithRelationsAsync(id.Value);
 
             if (persona == null)
             {
@@ -97,8 +94,7 @@ namespace PersonApi.Web.Controllers
                     Edad = viewModel.Edad
                 };
 
-                _context.Add(persona);
-                await _context.SaveChangesAsync();
+                await _personas.AddAsync(persona);
                 return RedirectToAction(nameof(Index));
             }
             return View(viewModel);
@@ -112,7 +108,7 @@ namespace PersonApi.Web.Controllers
                 return NotFound();
             }
 
-            var persona = await _context.Personas.FindAsync(id);
+            var persona = await _personas.GetByIdAsync(id.Value);
             if (persona == null)
             {
                 return NotFound();
@@ -142,33 +138,18 @@ namespace PersonApi.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                var persona = await _personas.GetByIdAsync(id);
+                if (persona == null)
                 {
-                    var persona = await _context.Personas.FindAsync(id);
-                    if (persona == null)
-                    {
-                        return NotFound();
-                    }
-
-                    persona.Nombre = viewModel.Nombre;
-                    persona.Apellido = viewModel.Apellido;
-                    persona.Genero = viewModel.Genero;
-                    persona.Edad = viewModel.Edad;
-
-                    _context.Update(persona);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PersonaExists(viewModel.Cc))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+
+                persona.Nombre = viewModel.Nombre;
+                persona.Apellido = viewModel.Apellido;
+                persona.Genero = viewModel.Genero;
+                persona.Edad = viewModel.Edad;
+
+                await _personas.UpdateAsync(persona);
                 return RedirectToAction(nameof(Index));
             }
             return View(viewModel);
@@ -182,8 +163,7 @@ namespace PersonApi.Web.Controllers
                 return NotFound();
             }
 
-            var persona = await _context.Personas
-                .FirstOrDefaultAsync(m => m.Cc == id);
+            var persona = await _personas.GetByIdAsync(id.Value);
 
             if (persona == null)
             {
@@ -207,19 +187,13 @@ namespace PersonApi.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var persona = await _context.Personas.FindAsync(id);
-            if (persona != null)
-            {
-                _context.Personas.Remove(persona);
-            }
-
-            await _context.SaveChangesAsync();
+            await _personas.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool PersonaExists(int id)
         {
-            return _context.Personas.Any(e => e.Cc == id);
+            return _personas.ExistsAsync(id).GetAwaiter().GetResult();
         }
     }
 }

@@ -1,27 +1,29 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using personapi_dotnet.Models.Context;
 using personapi_dotnet.Models.ViewModels;
 using personapi_dotnet.Models.Entities;
+using personapi_dotnet.Models.Interfaces;
 
 namespace PersonApi.Web.Controllers
 {
     public class EstudioController : Controller
     {
-        private readonly PersonaDbContext _context;
+        private readonly IEstudioRepository _estudios;
+        private readonly IPersonaRepository _personas;
+        private readonly IProfesionRepository _profesiones;
 
-        public EstudioController(PersonaDbContext context)
+        public EstudioController(IEstudioRepository estudios, IPersonaRepository personas, IProfesionRepository profesiones)
         {
-            _context = context;
+            _estudios = estudios;
+            _personas = personas;
+            _profesiones = profesiones;
         }
 
         // GET: Estudio
         public async Task<IActionResult> Index()
         {
-            var estudios = await _context.Estudios
-                .Include(e => e.CcPerNavigation)
-                .Include(e => e.IdProfNavigation)
+            var estudios = (await _estudios.GetAllAsync())
                 .Select(e => new EstudioViewModel
                 {
                     IdProf = e.IdProf,
@@ -31,7 +33,7 @@ namespace PersonApi.Web.Controllers
                     ProfesionNombre = e.IdProfNavigation.Nom,
                     PersonaNombre = e.CcPerNavigation.Nombre + " " + e.CcPerNavigation.Apellido
                 })
-                .ToListAsync();
+                .ToList();
 
             return View(estudios);
         }
@@ -44,10 +46,7 @@ namespace PersonApi.Web.Controllers
                 return NotFound();
             }
 
-            var estudio = await _context.Estudios
-                .Include(e => e.CcPerNavigation)
-                .Include(e => e.IdProfNavigation)
-                .FirstOrDefaultAsync(m => m.IdProf == idProf && m.CcPer == ccPer);
+            var estudio = await _estudios.GetByKeyWithRelationsAsync(idProf.Value, ccPer.Value);
 
             if (estudio == null)
             {
@@ -70,8 +69,8 @@ namespace PersonApi.Web.Controllers
         // GET: Estudio/Create
         public IActionResult Create()
         {
-            ViewData["CcPer"] = new SelectList(_context.Personas, "Cc", "Nombre");
-            ViewData["IdProf"] = new SelectList(_context.Profesions, "Id", "Nom");
+            ViewData["CcPer"] = new SelectList(await _personas.GetAllAsync(), "Cc", "Nombre");
+            ViewData["IdProf"] = new SelectList(await _profesiones.GetAllAsync(), "Id", "Nom");
             return View();
         }
 
@@ -90,12 +89,11 @@ namespace PersonApi.Web.Controllers
                     Univer = viewModel.Univer
                 };
 
-                _context.Add(estudio);
-                await _context.SaveChangesAsync();
+                await _estudios.AddAsync(estudio);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CcPer"] = new SelectList(_context.Personas, "Cc", "Nombre", viewModel.CcPer);
-            ViewData["IdProf"] = new SelectList(_context.Profesions, "Id", "Nom", viewModel.IdProf);
+            ViewData["CcPer"] = new SelectList(await _personas.GetAllAsync(), "Cc", "Nombre", viewModel.CcPer);
+            ViewData["IdProf"] = new SelectList(await _profesiones.GetAllAsync(), "Id", "Nom", viewModel.IdProf);
             return View(viewModel);
         }
 
@@ -107,7 +105,7 @@ namespace PersonApi.Web.Controllers
                 return NotFound();
             }
 
-            var estudio = await _context.Estudios.FindAsync(idProf, ccPer);
+            var estudio = await _estudios.GetByKeyAsync(idProf.Value, ccPer.Value);
             if (estudio == null)
             {
                 return NotFound();
@@ -121,8 +119,8 @@ namespace PersonApi.Web.Controllers
                 Univer = estudio.Univer
             };
 
-            ViewData["CcPer"] = new SelectList(_context.Personas, "Cc", "Nombre", viewModel.CcPer);
-            ViewData["IdProf"] = new SelectList(_context.Profesions, "Id", "Nom", viewModel.IdProf);
+            ViewData["CcPer"] = new SelectList(await _personas.GetAllAsync(), "Cc", "Nombre", viewModel.CcPer);
+            ViewData["IdProf"] = new SelectList(await _profesiones.GetAllAsync(), "Id", "Nom", viewModel.IdProf);
             return View(viewModel);
         }
 
@@ -138,35 +136,20 @@ namespace PersonApi.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                var estudio = await _estudios.GetByKeyAsync(idProf, ccPer);
+                if (estudio == null)
                 {
-                    var estudio = await _context.Estudios.FindAsync(idProf, ccPer);
-                    if (estudio == null)
-                    {
-                        return NotFound();
-                    }
-
-                    estudio.Fecha = viewModel.Fecha;
-                    estudio.Univer = viewModel.Univer;
-
-                    _context.Update(estudio);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EstudioExists(viewModel.IdProf, viewModel.CcPer))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+
+                estudio.Fecha = viewModel.Fecha;
+                estudio.Univer = viewModel.Univer;
+
+                await _estudios.UpdateAsync(estudio);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CcPer"] = new SelectList(_context.Personas, "Cc", "Nombre", viewModel.CcPer);
-            ViewData["IdProf"] = new SelectList(_context.Profesions, "Id", "Nom", viewModel.IdProf);
+            ViewData["CcPer"] = new SelectList(await _personas.GetAllAsync(), "Cc", "Nombre", viewModel.CcPer);
+            ViewData["IdProf"] = new SelectList(await _profesiones.GetAllAsync(), "Id", "Nom", viewModel.IdProf);
             return View(viewModel);
         }
 
@@ -178,10 +161,7 @@ namespace PersonApi.Web.Controllers
                 return NotFound();
             }
 
-            var estudio = await _context.Estudios
-                .Include(e => e.CcPerNavigation)
-                .Include(e => e.IdProfNavigation)
-                .FirstOrDefaultAsync(m => m.IdProf == idProf && m.CcPer == ccPer);
+            var estudio = await _estudios.GetByKeyWithRelationsAsync(idProf.Value, ccPer.Value);
 
             if (estudio == null)
             {
@@ -206,19 +186,13 @@ namespace PersonApi.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int idProf, int ccPer)
         {
-            var estudio = await _context.Estudios.FindAsync(idProf, ccPer);
-            if (estudio != null)
-            {
-                _context.Estudios.Remove(estudio);
-            }
-
-            await _context.SaveChangesAsync();
+            await _estudios.DeleteAsync(idProf, ccPer);
             return RedirectToAction(nameof(Index));
         }
 
         private bool EstudioExists(int idProf, int ccPer)
         {
-            return _context.Estudios.Any(e => e.IdProf == idProf && e.CcPer == ccPer);
+            return _estudios.ExistsAsync(idProf, ccPer).GetAwaiter().GetResult();
         }
     }
 }
