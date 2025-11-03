@@ -1,0 +1,28 @@
+@model personapi_dotnet.Models.ViewModels.ProfesionViewModel
+
+@{
+    ViewData["Title"] = "Profesion Details";
+}
+
+<div class="container mt-4">
+    <h1>Profesion Details</h1>
+
+    <div>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Id)</dt>
+            <dd class="col-sm-10">@Html.DisplayFor(model => model.Id)</dd>
+            
+            <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Nom)</dt>
+            <dd class="col-sm-10">@Html.DisplayFor(model => model.Nom)</dd>
+            
+            <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Des)</dt>
+            <dd class="col-sm-10">@Html.DisplayFor(model => model.Des)</dd>
+        </dl>
+    </div>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+

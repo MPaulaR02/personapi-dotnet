@@ -61,7 +61,7 @@ namespace PersonApi.Web.Controllers
         }
 
         // GET: Telefono/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             ViewData["Duenio"] = new SelectList(await _personas.GetAllAsync(), "Cc", "Nombre");
             return View();

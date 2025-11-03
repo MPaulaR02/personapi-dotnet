@@ -1,0 +1,49 @@
+@model personapi_dotnet.Models.ViewModels.EstudioViewModel
+
+@{
+    ViewData["Title"] = "Edit Estudio";
+}
+
+<div class="container mt-4">
+    <h1>Edit Estudio</h1>
+
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="IdProf" />
+                <input type="hidden" asp-for="CcPer" />
+                <div class="form-group mb-3">
+                    <label asp-for="CcPer" class="control-label">Persona</label>
+                    <select asp-for="CcPer" class="form-control" asp-items="ViewBag.CcPer" disabled>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="IdProf" class="control-label">Profesion</label>
+                    <select asp-for="IdProf" class="form-control" asp-items="ViewBag.IdProf" disabled>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Univer" class="control-label"></label>
+                    <input asp-for="Univer" class="form-control" />
+                    <span asp-validation-for="Univer" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Fecha" class="control-label"></label>
+                    <input asp-for="Fecha" class="form-control" type="date" />
+                    <span asp-validation-for="Fecha" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

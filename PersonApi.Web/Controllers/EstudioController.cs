@@ -67,7 +67,7 @@ namespace PersonApi.Web.Controllers
         }
 
         // GET: Estudio/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             ViewData["CcPer"] = new SelectList(await _personas.GetAllAsync(), "Cc", "Nombre");
             ViewData["IdProf"] = new SelectList(await _profesiones.GetAllAsync(), "Id", "Nom");

@@ -1,0 +1,41 @@
+@model IEnumerable<personapi_dotnet.Models.ViewModels.EstudioViewModel>
+
+@{
+    ViewData["Title"] = "Estudios";
+}
+
+<div class="container mt-4">
+    <h1>Estudios</h1>
+
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Create New</a>
+    </p>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.PersonaNombre)</th>
+                <th>@Html.DisplayNameFor(model => model.ProfesionNombre)</th>
+                <th>@Html.DisplayNameFor(model => model.Univer)</th>
+                <th>@Html.DisplayNameFor(model => model.Fecha)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.PersonaNombre)</td>
+                    <td>@Html.DisplayFor(modelItem => item.ProfesionNombre)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Univer)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Fecha)</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-idProf="@item.IdProf" asp-route-ccPer="@item.CcPer" class="btn btn-sm btn-warning">Edit</a>
+                        <a asp-action="Details" asp-route-idProf="@item.IdProf" asp-route-ccPer="@item.CcPer" class="btn btn-sm btn-info">Details</a>
+                        <a asp-action="Delete" asp-route-idProf="@item.IdProf" asp-route-ccPer="@item.CcPer" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
