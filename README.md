@@ -4,6 +4,10 @@
 
 Sistema de gestión de información de personas implementado con arquitectura Modelo-Vista-Controlador (MVC) utilizando .NET 8, SQL Server 2022 y Docker. El sistema gestiona información relacionada con personas, profesiones, estudios y teléfonos.
 
+## DDL y DML
+
+en la carpeta scripts se escuentran estos archivos como example.sql y init.sql
+
 # 🛠️ Tecnologías
 
 .NET 8 (ASP.NET Core MVC)
